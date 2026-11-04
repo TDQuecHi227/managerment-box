@@ -100,11 +100,57 @@ export default function AdminArena() {
   // --- XỬ LÝ CỘT TRÁI: MỞ MODAL CẬP NHẬT ACC CHƯA LEO ---
   const openUpdateModal = (item) => {
     setSelectedList(item);
-    setEditUnclimbedCount(String(item.unclimbed_count ?? Math.max(0, (item.total_count || 0) - (item.climbed_count || 0))));
-    setEditClimbedCount(String(item.climbed_count || 0));
+    const total = item.total_count || 0;
+    const climbed = item.climbed_count || 0;
+    const unc = item.unclimbed_count !== undefined ? item.unclimbed_count : Math.max(0, total - climbed);
+    setEditUnclimbedCount(String(unc));
+    setEditClimbedCount(String(climbed));
     setEditRawNote(item.raw_note || '');
     setUpdateError('');
     setShowUpdateModal(true);
+  };
+
+  // Khi sửa số acc đã leo -> tự động cập nhật số acc chưa leo còn lại!
+  const handleClimbedChange = (valStr) => {
+    setEditClimbedCount(valStr);
+    if (!selectedList) return;
+    const total = selectedList.total_count || 0;
+    const numClimbed = parseInt(valStr, 10);
+    if (!isNaN(numClimbed)) {
+      const remainingUnclimbed = Math.max(0, total - numClimbed);
+      setEditUnclimbedCount(String(remainingUnclimbed));
+    }
+  };
+
+  // Khi sửa số acc chưa leo -> tự động cập nhật số acc đã leo!
+  const handleUnclimbedChange = (valStr) => {
+    setEditUnclimbedCount(valStr);
+    if (!selectedList) return;
+    const total = selectedList.total_count || 0;
+    const numUnclimbed = parseInt(valStr, 10);
+    if (!isNaN(numUnclimbed)) {
+      const calculatedClimbed = Math.max(0, total - numUnclimbed);
+      setEditClimbedCount(String(calculatedClimbed));
+    }
+  };
+
+  // Nút nhanh: Tăng số acc đã leo thêm +1, +3, +5 acc
+  const handleQuickAddClimbed = (amount) => {
+    if (!selectedList) return;
+    const total = selectedList.total_count || 0;
+    const currentClimbed = parseInt(editClimbedCount, 10) || 0;
+    const nextClimbed = Math.min(total, currentClimbed + amount);
+    const nextUnclimbed = Math.max(0, total - nextClimbed);
+    setEditClimbedCount(String(nextClimbed));
+    setEditUnclimbedCount(String(nextUnclimbed));
+  };
+
+  // Nút nhanh: Đã leo xong tất cả acc trong list (0 chưa leo)
+  const handleQuickClimbAll = () => {
+    if (!selectedList) return;
+    const total = selectedList.total_count || 0;
+    setEditClimbedCount(String(total));
+    setEditUnclimbedCount('0');
   };
 
   const handleSaveUpdate = async (e) => {
@@ -286,18 +332,25 @@ export default function AdminArena() {
 
   const { stats, unclimbed_lists = [], distributions = [] } = data;
 
-  // Lọc danh sách bên trái
+  // Lọc danh sách bên trái: Chỉ hiển thị các list CÒN ACC CHƯA LEO (> 0)!
+  // Hết acc trong list (unclimbed === 0) thì BỎ RA KHỎI DANH SÁCH CHƯA LEO LUÔN!
   const filteredLists = unclimbed_lists.filter((l) => {
+    const unclimbed = l.unclimbed_count !== undefined
+      ? l.unclimbed_count
+      : Math.max(0, (l.total_count || 0) - (l.climbed_count || 0));
+
+    // Bỏ list đã hết acc chưa leo ra khỏi danh sách
+    if (unclimbed <= 0) return false;
+
     const s = searchTerm.toLowerCase();
-    const matchSearch =
+    if (!s) return true;
+
+    return (
       l.account_name?.toLowerCase().includes(s) ||
       l.display_name?.toLowerCase().includes(s) ||
       l.game_name?.toLowerCase().includes(s) ||
-      l.raw_note?.toLowerCase().includes(s);
-
-    if (!matchSearch) return false;
-    if (filterUnclimbedOnly) return (l.unclimbed_count || 0) > 0;
-    return true;
+      l.raw_note?.toLowerCase().includes(s)
+    );
   });
 
   return (
@@ -415,16 +468,9 @@ export default function AdminArena() {
               </div>
 
               <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setFilterUnclimbedOnly(!filterUnclimbedOnly)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                    filterUnclimbedOnly
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {filterUnclimbedOnly ? 'Còn chưa leo' : 'Tất cả list'}
-                </button>
+                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                  {filteredLists.length} list còn acc chờ leo
+                </span>
               </div>
             </div>
 
@@ -707,34 +753,87 @@ export default function AdminArena() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-800 mb-1.5">
-                    Số acc chưa leo còn lại *
+                  <label className="block text-xs font-bold uppercase tracking-wider text-emerald-800 mb-1.5 flex items-center justify-between">
+                    <span>Số acc đã leo</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold font-mono">Tối đa: {selectedList.total_count}</span>
                   </label>
                   <input
                     type="number"
                     min="0"
-                    required
-                    value={editUnclimbedCount}
-                    onChange={(e) => setEditUnclimbedCount(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    max={selectedList.total_count}
+                    value={editClimbedCount}
+                    onChange={(e) => handleClimbedChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">Sau khi leo xong có thể giảm số này</span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">Tự động trừ vào số chưa leo</span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-emerald-800 mb-1.5">
-                    Số acc đã leo
+                  <label className="block text-xs font-bold uppercase tracking-wider text-amber-800 mb-1.5 flex items-center justify-between">
+                    <span>Chưa leo còn lại *</span>
+                    <span className="text-[10px] text-amber-600 font-semibold font-mono">Tự động tính</span>
                   </label>
                   <input
                     type="number"
                     min="0"
-                    value={editClimbedCount}
-                    onChange={(e) => setEditClimbedCount(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    max={selectedList.total_count}
+                    required
+                    value={editUnclimbedCount}
+                    onChange={(e) => handleUnclimbedChange(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">Tích lũy số acc đã leo</span>
+                  <span className="text-[10px] text-slate-400 mt-1 block">= Tổng ({selectedList.total_count}) - Đã leo</span>
                 </div>
               </div>
+
+              {/* Phím tắt cập nhật nhanh số acc đã leo */}
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Phím tắt cập nhật nhanh:
+                </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddClimbed(1)}
+                    className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-bold transition cursor-pointer shadow-xs"
+                    title="Tăng thêm 1 acc đã leo"
+                  >
+                    +1 đã leo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddClimbed(3)}
+                    className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-bold transition cursor-pointer shadow-xs"
+                    title="Tăng thêm 3 acc đã leo"
+                  >
+                    +3 đã leo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQuickAddClimbed(5)}
+                    className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-800 border border-slate-200 hover:border-emerald-300 rounded-lg text-xs font-bold transition cursor-pointer shadow-xs"
+                    title="Tăng thêm 5 acc đã leo"
+                  >
+                    +5 đã leo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleQuickClimbAll}
+                    className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-xs font-extrabold transition cursor-pointer shadow-xs"
+                    title="Đánh dấu đã leo toàn bộ acc"
+                  >
+                    ⚔️ Đã leo hết (0 chưa leo)
+                  </button>
+                </div>
+              </div>
+
+              {/* Thông báo khi hết acc chưa leo */}
+              {(editUnclimbedCount === '0' || parseInt(editUnclimbedCount, 10) === 0) && (
+                <div className="p-2.5 bg-emerald-50 rounded-xl border border-emerald-300 text-emerald-800 text-xs flex items-center gap-2 font-medium">
+                  <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+                  <span>Đã hết acc chưa leo! Khi lưu, list này sẽ tự động được bỏ khỏi danh sách chưa leo.</span>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">

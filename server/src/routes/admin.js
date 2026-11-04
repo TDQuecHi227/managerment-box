@@ -592,6 +592,14 @@ router.post('/clone-lists/:id/add-clones', async (req, res) => {
 
     // 1. Cập nhật tổng số clone và ghi chú của List
     list.total_count = (list.total_count || 0) + addedCount;
+    list.unclimbed_count = (list.unclimbed_count || 0) + addedCount;
+    if (list.unclimbed_count > 0 && (list.climbed_count || 0) > 0) {
+      list.arena_status = 'PARTIALLY_CLIMBED';
+    } else if (list.unclimbed_count > 0) {
+      list.arena_status = 'NOT_CLIMBED';
+    } else {
+      list.arena_status = 'CLIMBED';
+    }
     if (raw_note && raw_note.trim()) {
       list.raw_note = raw_note.trim();
     }
@@ -884,18 +892,20 @@ router.put('/arena/clone-lists/:id', async (req, res) => {
     }
 
     const { unclimbed_count, raw_note, climbed_count } = req.body;
+    const total = list.total_count || 0;
+
+    if (climbed_count !== undefined && climbed_count !== null) {
+      list.climbed_count = Math.max(0, parseInt(climbed_count, 10) || 0);
+    }
 
     if (unclimbed_count !== undefined && unclimbed_count !== null) {
-      const newUnc = Math.max(0, parseInt(unclimbed_count, 10) || 0);
-      list.unclimbed_count = newUnc;
+      list.unclimbed_count = Math.max(0, parseInt(unclimbed_count, 10) || 0);
+    } else if (climbed_count !== undefined && climbed_count !== null) {
+      list.unclimbed_count = Math.max(0, total - (list.climbed_count || 0));
     }
 
     if (raw_note !== undefined) {
       list.raw_note = (raw_note || '').trim();
-    }
-
-    if (climbed_count !== undefined && climbed_count !== null) {
-      list.climbed_count = Math.max(0, parseInt(climbed_count, 10) || 0);
     }
 
     // Tự động đồng bộ arena_status
