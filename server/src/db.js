@@ -184,9 +184,18 @@ function getMonthRangeUTC7(monthStr = null) {
   return { targetMonth, start, end };
 }
 
-// Lấy hoặc tạo tự động kỳ tuần KPI hiện tại (mỗi tuần 21 acc, 3 acc/ngày)
-async function getOrCreateCurrentPeriod() {
-  const now = new Date(Date.now() + 7 * 3600 * 1000);
+// Lấy hoặc tạo tự động kỳ tuần KPI (mỗi tuần 21 acc, 3 acc/ngày)
+async function getOrCreateCurrentPeriod(dateOrStr = null) {
+  let now;
+  if (dateOrStr) {
+    if (typeof dateOrStr === 'string' && !dateOrStr.includes('T')) {
+      now = new Date(`${dateOrStr}T12:00:00+07:00`);
+    } else {
+      now = new Date(dateOrStr);
+    }
+  } else {
+    now = new Date(Date.now() + 7 * 3600 * 1000);
+  }
   const dayOfWeek = now.getUTCDay(); // 0: CN, 1: T2, ...
   const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 

@@ -506,7 +506,7 @@ router.post('/clone-lists', async (req, res) => {
     }
 
     const note = raw_note && raw_note.trim() ? raw_note.trim() : `${accName} | ${parsedCount} acc`;
-    const currentPeriod = await getOrCreateCurrentPeriod();
+    const currentPeriod = await getOrCreateCurrentPeriod(submission_date);
 
     let createdAt = new Date();
     if (submission_date) {
@@ -582,7 +582,7 @@ router.post('/clone-lists/:id/add-clones', async (req, res) => {
       return res.status(400).json({ error: 'Số lượng Clone nộp thêm phải là số lớn hơn 0.' });
     }
 
-    const currentPeriod = await getOrCreateCurrentPeriod();
+    const currentPeriod = await getOrCreateCurrentPeriod(submission_date);
 
     let createdAt = new Date();
     if (submission_date) {
@@ -734,7 +734,7 @@ router.post('/clones', async (req, res) => {
       return res.status(400).json({ error: 'Vui lòng nhập số lượng tài khoản hợp lệ lớn hơn 0.' });
     }
 
-    const currentPeriod = await getOrCreateCurrentPeriod();
+    const currentPeriod = await getOrCreateCurrentPeriod(submission_date);
 
     let createdAt = new Date();
     if (submission_date) {
