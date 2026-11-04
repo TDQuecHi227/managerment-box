@@ -437,19 +437,25 @@ export default function AdminDashboard({ setActiveTab }) {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                          Chưa leo: {list.unclimbed_count ?? list.total_count}
+                        </span>
+                        <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          Đã leo: {list.climbed_count ?? 0}
+                        </span>
                         <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap">
                           {list.total_count} acc
                         </span>
                         {list.today_added_count > 0 && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
                             +{list.today_added_count} hôm nay
                           </span>
                         )}
                       </div>
                     </div>
 
-                    {/* Note Box with Copy button & Nộp thêm button */}
+                    {/* Note Box with Copy button */}
                     <div className="flex items-center justify-between gap-2 p-2 bg-white rounded-lg border border-slate-200 text-xs font-mono text-slate-700">
                       <span className="truncate select-all" title={list.raw_note}>
                         {list.raw_note || 'Không có ghi chú'}
@@ -475,15 +481,23 @@ export default function AdminDashboard({ setActiveTab }) {
                       )}
                     </div>
 
-                    {/* Action: Nộp thêm vào list này */}
-                    <div className="flex items-center justify-end pt-1">
+                    {/* Actions: Leo Đấu trường & Nộp thêm vào list */}
+                    <div className="flex items-center justify-end gap-2 pt-1 flex-wrap">
+                      <button
+                        onClick={() => setActiveTab('admin-clones')}
+                        className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+                        title="Quản lý leo đấu trường & phát acc theo ngày"
+                      >
+                        <Swords size={13} />
+                        <span>⚔️ Leo Đấu Trường</span>
+                      </button>
                       <button
                         onClick={() => openAddClonesModal(list)}
                         className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
                         title="Nộp thêm clone vào list này"
                       >
                         <Plus size={13} />
-                        <span>+ Nộp thêm vào list này</span>
+                        <span>+ Nộp thêm</span>
                       </button>
                     </div>
                   </div>

@@ -58,8 +58,17 @@ const cloneListSchema = new mongoose.Schema({
   user_id: { type: Number, required: true, index: true },
   account_name: { type: String, required: true, trim: true },
   total_count: { type: Number, default: 0 },
-  raw_note: { type: String, default: '' },
-  arena_status: { type: String, enum: ['NOT_CLIMBED', 'CLIMBED'], default: 'NOT_CLIMBED' },
+  climbed_count: { type: Number, default: 0 },
+  unclimbed_count: { type: Number, default: 0 },
+  raw_note: { type: String, default: '' }, // Ghi chú danh sách acc chưa leo
+  climbed_note: { type: String, default: '' }, // Ghi chú các acc đã leo để phát theo ngày
+  arena_status: { type: String, enum: ['NOT_CLIMBED', 'PARTIALLY_CLIMBED', 'CLIMBED'], default: 'NOT_CLIMBED' },
+  arena_history: [{
+    date: { type: String },
+    climbed_count: { type: Number },
+    note: { type: String },
+    created_at: { type: Date, default: Date.now }
+  }],
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });
