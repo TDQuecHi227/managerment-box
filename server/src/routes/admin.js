@@ -891,7 +891,7 @@ router.put('/arena/clone-lists/:id', async (req, res) => {
     }
 
     if (raw_note !== undefined) {
-      list.raw_note = raw_note.trim();
+      list.raw_note = (raw_note || '').trim();
     }
 
     if (climbed_count !== undefined && climbed_count !== null) {
@@ -928,7 +928,7 @@ router.put('/arena/clone-lists/:id', async (req, res) => {
     });
   } catch (err) {
     console.error('Error in PUT /api/admin/arena/clone-lists/:id:', err);
-    res.status(500).json({ error: 'Đã xảy ra lỗi máy chủ.' });
+    res.status(500).json({ error: err.message || 'Đã xảy ra lỗi máy chủ.' });
   }
 });
 
