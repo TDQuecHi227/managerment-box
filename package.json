@@ -1,0 +1,13 @@
+{
+  "name": "management-box-chat",
+  "version": "1.0.0",
+  "description": "Box Chat Management System",
+  "scripts": {
+    "server": "node server/src/index.js",
+    "client": "npm run dev --prefix client",
+    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "start": "node server/src/index.js"
+  },
+  "devDependencies": {}
+}
+
