@@ -16,6 +16,7 @@ export default function Navbar({ activeTab, setActiveTab }) {
   const adminTabs = [
     { id: 'admin-dashboard', label: 'Tổng quan' },
     { id: 'admin-clones', label: 'Quản lý Clone' },
+    { id: 'admin-arena', label: 'Leo Đấu Trường' },
     { id: 'admin-kpi', label: 'KPI & Lịch sử cày' },
     { id: 'admin-donations', label: 'Donate tháng' },
     { id: 'admin-members', label: 'Quản lý thành viên' }

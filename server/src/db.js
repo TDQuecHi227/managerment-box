@@ -58,17 +58,8 @@ const cloneListSchema = new mongoose.Schema({
   user_id: { type: Number, required: true, index: true },
   account_name: { type: String, required: true, trim: true },
   total_count: { type: Number, default: 0 },
-  climbed_count: { type: Number, default: 0 },
-  unclimbed_count: { type: Number, default: 0 },
-  raw_note: { type: String, default: '' }, // Ghi chú danh sách acc chưa leo
-  climbed_note: { type: String, default: '' }, // Ghi chú các acc đã leo để phát theo ngày
-  arena_status: { type: String, enum: ['NOT_CLIMBED', 'PARTIALLY_CLIMBED', 'CLIMBED'], default: 'NOT_CLIMBED' },
-  arena_history: [{
-    date: { type: String },
-    climbed_count: { type: Number },
-    note: { type: String },
-    created_at: { type: Date, default: Date.now }
-  }],
+  raw_note: { type: String, default: '' },
+  arena_status: { type: String, enum: ['NOT_CLIMBED', 'CLIMBED'], default: 'NOT_CLIMBED' },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });
@@ -133,6 +124,20 @@ const violationActionSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now }
 });
 const ViolationAction = mongoose.model('ViolationAction', violationActionSchema);
+
+// Arena Distribution schema (Phát lì xì clone theo ngày)
+const arenaDistributionSchema = new mongoose.Schema({
+  id: { type: Number, unique: true, index: true },
+  distribution_date: { type: String, required: true, index: true }, // 'YYYY-MM-DD'
+  list_id: { type: Number, default: null, index: true },
+  account_name: { type: String, default: '' },
+  count: { type: Number, required: true, default: 1 }, // Số lượng acc phát lì xì
+  note: { type: String, required: true }, // Ghi chú danh sách acc / pass phát lì xì
+  created_by: { type: Number, default: null },
+  created_at: { type: Date, default: Date.now },
+  updated_at: { type: Date, default: Date.now }
+});
+const ArenaDistribution = mongoose.model('ArenaDistribution', arenaDistributionSchema);
 
 // System Settings schema
 const systemSettingsSchema = new mongoose.Schema({
@@ -323,6 +328,7 @@ module.exports = {
   DonationSubmission,
   DonationRecipient,
   ViolationAction,
+  ArenaDistribution,
   SystemSettings,
   AuditLog,
   Counter,

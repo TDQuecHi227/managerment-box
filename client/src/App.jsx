@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import LoginPage from './pages/LoginPage';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminClonesQueue from './pages/AdminClonesQueue';
+import AdminArena from './pages/AdminArena';
 import AdminDonationsQueue from './pages/AdminDonationsQueue';
 import AdminMembers from './pages/AdminMembers';
 import AdminKPI from './pages/AdminKPI';
@@ -44,7 +45,8 @@ function AppContent() {
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         <main className="flex-1 pb-12">
           {activeTab === 'admin-dashboard' && <AdminDashboard setActiveTab={setActiveTab} />}
-          {activeTab === 'admin-clones' && <AdminClonesQueue />}
+          {activeTab === 'admin-clones' && <AdminClonesQueue setActiveTab={setActiveTab} />}
+          {activeTab === 'admin-arena' && <AdminArena />}
           {activeTab === 'admin-donations' && <AdminDonationsQueue />}
           {activeTab === 'admin-members' && <AdminMembers />}
           {activeTab === 'admin-kpi' && <AdminKPI />}
