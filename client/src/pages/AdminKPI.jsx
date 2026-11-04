@@ -364,7 +364,7 @@ export default function AdminKPI() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Award className="text-blue-600" size={24} />
-            KPI & Lịch Sử Cày Clone (CaisBang)
+            KPI & Lịch Sử Cày Clone (Cái bang)
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Theo dõi nộp clone 3 acc/ngày, 21 acc/tuần và lưu trữ lịch sử cày acc của thành viên theo tuần trong tháng.
@@ -507,7 +507,7 @@ export default function AdminKPI() {
           <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-1">
             <p className="font-semibold text-blue-950 flex items-center gap-1.5">
               <ShieldAlert size={15} className="text-blue-600" />
-              Chính sách giám sát nộp Clone CaisBang:
+              Chính sách giám sát nộp Clone Cái bang:
             </p>
             <p>• Mỗi thành viên nộp đều đặn <b className="text-blue-950">3 acc/ngày</b> (Tổng cả tuần đạt <b className="text-blue-950">21 acc/tuần</b>). Mỗi ngày số acc đã nộp tự động reset và mỗi tuần reset KPI về 0.</p>
             <p>• Admin nhận tin nhắn từ thành viên ở app khác, bấm <b>"+ Nhập Clone"</b> để ghi nhận: nộp thêm vào list hiện có hoặc tạo list mới với tên tài khoản và ghi chú (tên tk + stt + mật khẩu).</p>

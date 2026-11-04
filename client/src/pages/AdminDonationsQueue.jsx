@@ -222,7 +222,7 @@ export default function AdminDonationsQueue() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Coins className="text-amber-500" size={26} />
-            Quản lý & Cập nhật Donate (CaisBang)
+            Quản lý & Cập nhật Donate (Cái bang)
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Admin trực tiếp chọn thành viên, nhập số tiền và tải ảnh biên lai minh chứng để cập nhật vào quỹ.

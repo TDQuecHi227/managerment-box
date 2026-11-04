@@ -84,8 +84,8 @@ export default function AdminDashboard({ setActiveTab }) {
     const defaultUserId = memberId
       ? String(memberId)
       : data?.memberKPIProgress?.[0]?.id
-      ? String(data.memberKPIProgress[0].id)
-      : '';
+        ? String(data.memberKPIProgress[0].id)
+        : '';
     setNewUserId(defaultUserId);
     setNewAccountName('');
     setNewCount('3');
@@ -223,7 +223,7 @@ export default function AdminDashboard({ setActiveTab }) {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-              Bảng điều khiển Quản trị CaisBang
+              Bảng điều khiển Quản trị Cái Bang
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
               ADMIN ONLY

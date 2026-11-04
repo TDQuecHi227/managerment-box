@@ -170,7 +170,7 @@ export default function AdminMembers() {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Users className="text-blue-600" size={24} />
-            Quản Lý Thành Viên CaisBang
+            Quản Lý Thành Viên Cái bang
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             2 hình thức quản lý: Thành viên nộp clone hàng ngày (3 acc/ngày, 21 acc/tuần) và Thành viên donate tháng.

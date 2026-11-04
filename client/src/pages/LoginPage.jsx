@@ -29,7 +29,7 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center space-y-1">
           <h1 className="text-3xl font-black text-slate-900 tracking-tight">
-            CaisBang
+            Cái bang
           </h1>
           <p className="text-xs text-slate-500 font-medium">
             Cổng Quản Trị Hệ Thống BoxGame

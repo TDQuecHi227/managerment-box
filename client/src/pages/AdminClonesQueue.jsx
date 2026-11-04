@@ -103,8 +103,8 @@ export default function AdminClonesQueue({ setActiveTab }) {
     const defaultUserId = memberId
       ? String(memberId)
       : membersList[0]?.id
-      ? String(membersList[0].id)
-      : '';
+        ? String(membersList[0].id)
+        : '';
     setNewUserId(defaultUserId);
     setNewAccountName('');
     setNewCount('3');
@@ -289,7 +289,7 @@ export default function AdminClonesQueue({ setActiveTab }) {
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
             <Gamepad2 className="text-blue-600" size={24} />
-            Quản Lý List Clone (CaisBang)
+            Quản Lý List Clone (Cái Bang)
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Quản lý các list clone của thành viên: cập nhật nộp thêm clone vào list có sẵn hoặc tạo list clone mới.

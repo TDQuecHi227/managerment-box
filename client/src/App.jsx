@@ -55,7 +55,7 @@ function AppContent() {
         {/* Clean Production Footer */}
         <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500 shadow-xs">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p>© 2026 CaisBang - Quản lý Thành viên BoxGame</p>
+            <p>© 2026 Cái bang - Quản lý Thành viên BoxGame</p>
             <p className="text-[11px] text-slate-400">
               Cày Clone 3/ngày, 21/tuần • Quản lý Nộp Clone & Donate tháng
             </p>
