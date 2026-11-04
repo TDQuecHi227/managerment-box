@@ -26,8 +26,8 @@ async function getNextSequence(name) {
 // User schema
 const userSchema = new mongoose.Schema({
   id: { type: Number, unique: true, index: true },
-  username: { type: String, required: true, unique: true, trim: true },
-  password_hash: { type: String, required: true },
+  username: { type: String, trim: true, default: null },
+  password_hash: { type: String, default: null },
   display_name: { type: String, required: true, trim: true },
   game_name: { type: String, trim: true, default: null },
   system_role: { type: String, enum: ['ADMIN', 'MEMBER'], default: 'MEMBER' },
@@ -258,6 +258,21 @@ async function connectDB() {
       bank_account_holder: 'NGUYEN VAN ADMIN',
       qr_code_note: 'DONATE BOX CHAT'
     });
+  }
+
+  // Ensure username index is partial so members without username (null) do not collide
+  try {
+    await mongoose.connection.db.collection('users').dropIndex('username_1');
+  } catch (err) {
+    // Index may not exist yet or already dropped
+  }
+  try {
+    await mongoose.connection.db.collection('users').createIndex(
+      { username: 1 },
+      { unique: true, partialFilterExpression: { username: { $type: 'string' } } }
+    );
+  } catch (err) {
+    // Ignore if already matching
   }
 
   // Ensure default Admin user exists if database has 0 users (so Admin can log in)
