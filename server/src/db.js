@@ -60,7 +60,8 @@ const cloneListSchema = new mongoose.Schema({
   total_count: { type: Number, default: 0 },
   climbed_count: { type: Number, default: 0 },
   unclimbed_count: { type: Number, default: 0 },
-  raw_note: { type: String, default: '' }, // Ghi chú danh sách acc chưa leo
+  raw_note: { type: String, default: '' }, // Ghi chú tài khoản của List (xem list đó đã cày acc nào)
+  unclimbed_note: { type: String, default: '' }, // Ghi chú acc chưa leo (xem acc nào chưa leo)
   climbed_note: { type: String, default: '' }, // Ghi chú các acc đã leo để phát theo ngày
   arena_status: { type: String, enum: ['NOT_CLIMBED', 'PARTIALLY_CLIMBED', 'CLIMBED'], default: 'NOT_CLIMBED' },
   arena_history: [{

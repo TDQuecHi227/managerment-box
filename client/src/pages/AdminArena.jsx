@@ -41,7 +41,7 @@ export default function AdminArena() {
   const [selectedList, setSelectedList] = useState(null);
   const [editUnclimbedCount, setEditUnclimbedCount] = useState('');
   const [editClimbedCount, setEditClimbedCount] = useState('');
-  const [editRawNote, setEditRawNote] = useState('');
+  const [editUnclimbedNote, setEditUnclimbedNote] = useState('');
   const [submittingUpdate, setSubmittingUpdate] = useState(false);
   const [updateError, setUpdateError] = useState('');
 
@@ -105,7 +105,7 @@ export default function AdminArena() {
     const unc = item.unclimbed_count !== undefined ? item.unclimbed_count : Math.max(0, total - climbed);
     setEditUnclimbedCount(String(unc));
     setEditClimbedCount(String(climbed));
-    setEditRawNote(item.raw_note || '');
+    setEditUnclimbedNote(item.unclimbed_note || item.raw_note || '');
     setUpdateError('');
     setShowUpdateModal(true);
   };
@@ -165,7 +165,7 @@ export default function AdminArena() {
         body: JSON.stringify({
           unclimbed_count: parseInt(editUnclimbedCount, 10) || 0,
           climbed_count: parseInt(editClimbedCount, 10) || 0,
-          raw_note: editRawNote
+          unclimbed_note: editUnclimbedNote
         })
       });
 
@@ -191,7 +191,8 @@ export default function AdminArena() {
       setDistAccountName(presetList.account_name || '');
       const unc = presetList.unclimbed_count ?? Math.max(0, (presetList.total_count || 0) - (presetList.climbed_count || 0));
       setDistCount(unc > 0 ? (unc >= 3 ? '3' : String(unc)) : '3');
-      setDistNote(presetList.raw_note ? `[${presetList.account_name}] ${presetList.raw_note}` : '');
+      const noteToUse = presetList.unclimbed_note || presetList.raw_note || '';
+      setDistNote(noteToUse ? `[${presetList.account_name}] ${noteToUse}` : '');
     } else {
       setDistListId('');
       setDistAccountName('');
@@ -215,8 +216,9 @@ export default function AdminArena() {
       setDistAccountName(found.account_name || '');
       const unc = found.unclimbed_count ?? Math.max(0, (found.total_count || 0) - (found.climbed_count || 0));
       setDistCount(unc > 0 ? (unc >= 3 ? '3' : String(unc)) : '3');
-      if (found.raw_note) {
-        setDistNote(`[${found.account_name}] ${found.raw_note}`);
+      const noteToUse = found.unclimbed_note || found.raw_note || '';
+      if (noteToUse) {
+        setDistNote(`[${found.account_name}] ${noteToUse}`);
       }
     }
   };
@@ -349,6 +351,7 @@ export default function AdminArena() {
       l.account_name?.toLowerCase().includes(s) ||
       l.display_name?.toLowerCase().includes(s) ||
       l.game_name?.toLowerCase().includes(s) ||
+      l.unclimbed_note?.toLowerCase().includes(s) ||
       l.raw_note?.toLowerCase().includes(s)
     );
   });
@@ -537,11 +540,14 @@ export default function AdminArena() {
 
                       {/* Box Ghi chú acc chưa leo (STT & Pass) */}
                       <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
-                        <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold uppercase tracking-wider">
-                          <span>Ghi chú acc chưa leo:</span>
-                          {list.raw_note && (
+                        <div className="flex items-center justify-between text-[11px] text-amber-800 font-bold uppercase tracking-wider">
+                          <span className="flex items-center gap-1">
+                            <Swords size={12} className="text-amber-600" />
+                            Ghi chú acc chưa leo:
+                          </span>
+                          {(list.unclimbed_note || list.raw_note) && (
                             <button
-                              onClick={() => handleCopy(list.id, list.raw_note, 'LIST')}
+                              onClick={() => handleCopy(list.id, list.unclimbed_note || list.raw_note, 'LIST')}
                               className="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer"
                               title="Copy ghi chú acc chưa leo"
                             >
@@ -553,16 +559,25 @@ export default function AdminArena() {
                               ) : (
                                 <>
                                   <Copy size={11} />
-                                  <span>Copy</span>
+                                  <span>Copy chưa leo</span>
                                 </>
                               )}
                             </button>
                           )}
                         </div>
                         <p className="text-xs font-mono text-slate-800 whitespace-pre-wrap select-all break-words">
-                          {list.raw_note || <span className="text-slate-400 italic">Chưa có ghi chú</span>}
+                          {list.unclimbed_note || list.raw_note || <span className="text-slate-400 italic">Chưa có ghi chú chưa leo</span>}
                         </p>
                       </div>
+
+                      {/* Ghi chú tài khoản gốc (để xem list đó gồm những acc nào ban đầu) */}
+                      {list.raw_note && (
+                        <div className="px-2.5 py-1.5 bg-slate-100/80 rounded-lg text-[11px] font-mono text-slate-600 flex items-center justify-between gap-2 border border-slate-200/60">
+                          <span className="truncate select-all" title={`Ghi chú tài khoản gốc: ${list.raw_note}`}>
+                            <b className="text-slate-500 uppercase tracking-wider text-[10px]">Tài khoản gốc:</b> {list.raw_note}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Các nút thao tác của List: NÚT CẬP NHẬT (yêu cầu) + Nút phát lì xì nhanh */}
                       <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
@@ -836,20 +851,55 @@ export default function AdminArena() {
               )}
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  Ghi chú acc chưa leo (Tên tk, STT & Mật khẩu)
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <Swords size={14} className="text-amber-600" />
+                    <span>Ghi chú acc chưa leo (Tên tk, STT & Pass)</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Tách biệt với Ghi chú tài khoản
+                  </span>
+                </div>
                 <textarea
                   rows="4"
-                  value={editRawNote}
-                  onChange={(e) => setEditRawNote(e.target.value)}
+                  value={editUnclimbedNote}
+                  onChange={(e) => setEditUnclimbedNote(e.target.value)}
                   placeholder="Xóa bớt nick đã leo xong hoặc sửa lại danh sách nick chưa leo..."
                   className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 text-xs font-mono outline-none focus:ring-2 focus:ring-amber-500"
                 ></textarea>
-                <span className="text-[10px] text-slate-400 mt-1 block">
-                  Chỉ giữ lại các tài khoản còn chưa leo để tiện theo dõi.
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  Chỉ lưu danh sách các tài khoản chưa leo. Ghi chú tài khoản gốc của List sẽ KHÔNG bị thay đổi.
                 </span>
               </div>
+
+              {/* Box hiển thị tài khoản gốc của list để Admin tiện đối chiếu/copy */}
+              {selectedList?.raw_note && (
+                <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 space-y-1">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                    <span>Ghi chú tài khoản gốc (để xem list gồm những acc nào):</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopy(selectedList.id, selectedList.raw_note, 'ORIGINAL')}
+                      className="px-2 py-0.5 rounded bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer"
+                    >
+                      {copiedId === `${selectedList.id}-ORIGINAL` ? (
+                        <>
+                          <Check size={11} className="text-emerald-600" />
+                          <span className="text-emerald-700">Đã copy</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={11} />
+                          <span>Copy gốc</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs font-mono text-slate-700 whitespace-pre-wrap select-all break-words">
+                    {selectedList.raw_note}
+                  </p>
+                </div>
+              )}
 
               <div className="pt-2 flex justify-end gap-3 border-t border-slate-100">
                 <button

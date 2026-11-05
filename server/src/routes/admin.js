@@ -520,7 +520,11 @@ router.post('/clone-lists', async (req, res) => {
       user_id: member.id,
       account_name: accName,
       total_count: parsedCount,
-      raw_note: note,
+      unclimbed_count: parsedCount,
+      climbed_count: 0,
+      raw_note: note, // Ghi chú tài khoản gốc
+      unclimbed_note: note, // Khởi tạo ban đầu ghi chú chưa leo
+      climbed_note: '',
       arena_status: 'NOT_CLIMBED',
       created_at: createdAt,
       updated_at: createdAt
@@ -602,6 +606,11 @@ router.post('/clone-lists/:id/add-clones', async (req, res) => {
     }
     if (raw_note && raw_note.trim()) {
       list.raw_note = raw_note.trim();
+      if (!list.unclimbed_note || !list.unclimbed_note.trim()) {
+        list.unclimbed_note = raw_note.trim();
+      } else {
+        list.unclimbed_note = `${list.unclimbed_note}\n${raw_note.trim()}`;
+      }
     }
     list.updated_at = new Date();
     await list.save();
@@ -844,19 +853,22 @@ router.get('/arena', async (req, res) => {
 
     const totalClimbed = allLists.reduce((sum, l) => sum + (l.climbed_count || 0), 0);
     const totalUnclimbed = allLists.reduce((sum, l) => {
-      const unc = l.unclimbed_count !== undefined ? l.unclimbed_count : Math.max(0, (l.total_count || 0) - (l.climbed_count || 0));
+      const unc = Math.max(0, (l.total_count || 0) - (l.climbed_count || 0));
       return sum + unc;
     }, 0);
 
     const enrichedLists = allLists.map((l) => {
       const u = userMap[l.user_id];
-      const unc = l.unclimbed_count !== undefined ? l.unclimbed_count : Math.max(0, (l.total_count || 0) - (l.climbed_count || 0));
+      const climbed = l.climbed_count || 0;
+      const unc = Math.max(0, (l.total_count || 0) - climbed);
       return {
         ...l,
         display_name: u?.display_name || '—',
         game_name: u?.game_name || null,
         unclimbed_count: unc,
-        climbed_count: l.climbed_count || 0
+        climbed_count: climbed,
+        unclimbed_note: l.unclimbed_note !== undefined && l.unclimbed_note !== null && l.unclimbed_note !== '' ? l.unclimbed_note : (l.raw_note || ''),
+        raw_note: l.raw_note || ''
       };
     });
 
@@ -891,21 +903,23 @@ router.put('/arena/clone-lists/:id', async (req, res) => {
       return res.status(404).json({ error: 'Không tìm thấy List Clone.' });
     }
 
-    const { unclimbed_count, raw_note, climbed_count } = req.body;
+    const { unclimbed_count, unclimbed_note, raw_note, climbed_count } = req.body;
     const total = list.total_count || 0;
 
     if (climbed_count !== undefined && climbed_count !== null) {
       list.climbed_count = Math.max(0, parseInt(climbed_count, 10) || 0);
-    }
-
-    if (unclimbed_count !== undefined && unclimbed_count !== null) {
+      list.unclimbed_count = Math.max(0, total - list.climbed_count);
+    } else if (unclimbed_count !== undefined && unclimbed_count !== null) {
       list.unclimbed_count = Math.max(0, parseInt(unclimbed_count, 10) || 0);
-    } else if (climbed_count !== undefined && climbed_count !== null) {
+      list.climbed_count = Math.max(0, total - list.unclimbed_count);
+    } else {
       list.unclimbed_count = Math.max(0, total - (list.climbed_count || 0));
     }
 
-    if (raw_note !== undefined) {
-      list.raw_note = (raw_note || '').trim();
+    // Cập nhật riêng trường unclimbed_note, TUYỆT ĐỐI KHÔNG GHI ĐÈ list.raw_note (Ghi chú tài khoản gốc)!
+    const noteToSet = unclimbed_note !== undefined ? unclimbed_note : raw_note;
+    if (noteToSet !== undefined) {
+      list.unclimbed_note = (noteToSet || '').trim();
     }
 
     // Tự động đồng bộ arena_status
@@ -923,7 +937,7 @@ router.put('/arena/clone-lists/:id', async (req, res) => {
     await logAudit(req.user.id, 'UPDATE_ARENA_UNCLIMBED', 'CLONE_LIST', listId, {
       unclimbed_count: list.unclimbed_count,
       climbed_count: list.climbed_count,
-      raw_note: list.raw_note
+      unclimbed_note: list.unclimbed_note
     });
 
     const user = await User.findOne({ id: list.user_id }).lean();
